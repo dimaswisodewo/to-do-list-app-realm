@@ -48,7 +48,7 @@ class DataTableViewCell: UITableViewCell {
         return imageView
     }()
     
-    var getCheckmarkImage : UIImageView {
+    var getCheckmarkImage: UIImageView {
         get { checkmarkImage }
     }
     
