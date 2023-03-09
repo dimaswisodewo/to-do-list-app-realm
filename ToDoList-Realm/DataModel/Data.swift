@@ -6,15 +6,20 @@
 //
 
 import Foundation
+import RealmSwift
 
-class Data {
-    var name: String = ""
-    var category: Category = Category.uncategorized
-    var isChecked: Bool = false
+class Data: Object {
+    @objc dynamic var name: String = ""
+    @objc dynamic var category: String = Category.uncategorized.rawValue
+    @objc dynamic var isChecked: Bool = false
+    
+    override init() {
+        super.init()
+    }
     
     init(name: String, category: Category = Category.uncategorized, isChecked: Bool = false) {
         self.name = name
-        self.category = category
+        self.category = category.rawValue
         self.isChecked = isChecked
     }
 }

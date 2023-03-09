@@ -8,7 +8,7 @@
 import UIKit
 
 protocol DataTableViewCellDelegate {
-    func toggleCheckmark(cell: DataTableViewCell)
+    func toggleCheckmark(indexPath: IndexPath)
 }
 
 class DataTableViewCell: UITableViewCell {
@@ -16,7 +16,7 @@ class DataTableViewCell: UITableViewCell {
     var data: Data? {
         didSet {
             nameLabel.text = data?.name
-            categoryLabel.text = data?.category.rawValue
+            categoryLabel.text = data?.category
             checkmarkImage.isHidden = data == nil ? true : !data!.isChecked
         }
     }
