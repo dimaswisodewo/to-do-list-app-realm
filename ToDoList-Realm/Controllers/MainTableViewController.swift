@@ -7,6 +7,7 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 class MainTableViewController: UITableViewController {
 
@@ -14,7 +15,6 @@ class MainTableViewController: UITableViewController {
     
     private var addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
     private let editBarButton = UIBarButtonItem(image: UIImage(systemName: "pencil"), style: .plain, target: nil, action: nil)
-    private let deleteBarButton = UIBarButtonItem(barButtonSystemItem: .trash, target: nil, action: nil)
     
     lazy private var pickerView: UIPickerView = {
         let picker = UIPickerView()
@@ -25,7 +25,6 @@ class MainTableViewController: UITableViewController {
     private var titleTextField = UITextField()
     private var categoryTextField = UITextField()
     
-    private var isDelete = false
     private var isEdit = false
     
     private var selectedCategory: Category = Category.uncategorized
@@ -70,7 +69,6 @@ class MainTableViewController: UITableViewController {
     private func configureNavigationItem() {
         navigationItem.title = "To-Do List"
         navigationItem.setRightBarButtonItems([addBarButton], animated: true)
-        navigationItem.setLeftBarButtonItems([deleteBarButton, editBarButton], animated: true)
     }
     
     private func configureBarButtonAction() {
@@ -78,8 +76,6 @@ class MainTableViewController: UITableViewController {
         addBarButton.action = #selector(addButtonPressed)
         editBarButton.target = self
         editBarButton.action = #selector(editButtonPressed)
-        deleteBarButton.target = self
-        deleteBarButton.action = #selector(deleteButtonPressed)
     }
     
     @objc private func addButtonPressed() {
@@ -130,19 +126,8 @@ class MainTableViewController: UITableViewController {
     @objc func editButtonPressed() {
         // Toggle edit mode
         isEdit = !isEdit
-        isDelete = false
         
-        deleteBarButton.isEnabled = !isEdit
         addBarButton.isEnabled = !isEdit
-    }
-    
-    @objc func deleteButtonPressed() {
-        // Toggle delete mode
-        isDelete = !isDelete
-        isEdit = false
-        
-        editBarButton.isEnabled = !isDelete
-        addBarButton.isEnabled = !isDelete
     }
     
     //MARK: UITableView Delegate & DataSource
@@ -151,7 +136,9 @@ class MainTableViewController: UITableViewController {
         // Use reusable cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath) as! DataTableViewCell
         cell.data = itemArray?[indexPath.row]
-        return cell
+        let swipeCell = cell as SwipeTableViewCell
+        swipeCell.delegate = self
+        return swipeCell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -159,8 +146,6 @@ class MainTableViewController: UITableViewController {
         
         if isEdit {
             editCell(cellAtRow: indexPath.row)
-        } else if isDelete {
-            deleteCell(cellAtRow: indexPath.row)
         } else {
             toggleCheckmark(indexPath: indexPath)
         }
@@ -301,4 +286,29 @@ extension MainTableViewController: UIPickerViewDelegate, UIPickerViewDataSource 
         selectedCategory = Category.allCases[row] // Change the selected category
         categoryTextField.text = selectedCategory.rawValue // Change the categoryTextField text
     }
+}
+
+extension MainTableViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeCellKit.SwipeActionsOrientation) -> [SwipeCellKit.SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
+            // handle action by updating model with deletion
+            self?.deleteCell(cellAtRow: indexPath.row)
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete-icon")
+        
+        return [deleteAction]
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, editActionsOptionsForItemAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeOptions()
+        options.expansionStyle = .destructive
+        options.transitionStyle = .border
+        return options
+    }
+
 }

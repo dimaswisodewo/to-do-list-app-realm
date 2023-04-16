@@ -6,12 +6,13 @@
 //
 
 import UIKit
+import SwipeCellKit
 
 protocol DataTableViewCellDelegate {
     func toggleCheckmark(indexPath: IndexPath)
 }
 
-class DataTableViewCell: UITableViewCell {
+class DataTableViewCell: SwipeTableViewCell {
 
     var data: Data? {
         didSet {
